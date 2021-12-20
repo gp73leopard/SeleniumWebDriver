@@ -64,6 +64,7 @@ public class HelpdeskUITest extends Assert{
         }catch (Exception ex){
             throw new Exception("Ошибка поиска. Соответствий не найдено");
         }
+        driver.close();
     }
 
 
