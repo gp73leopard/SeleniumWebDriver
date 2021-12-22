@@ -1,66 +1,83 @@
 package pages;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
-
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
 public class TicketsPage extends AbstractPage {
 
-    // Входные данные
-    private String name = "Ticket_name_" + UUID.randomUUID().toString(); // UUID гарантирует уникальность строки
-    private String text = "Formulation of the problem is the first stage, basis, basis of scientific work. " +
-            "Without such a foundation, the rest of the activity turns into a meaningless, haphazard " +
-            "set of concepts, calculations and experiments. A systematic approach to analytical work is to " +
-            "create continuity, when, on the basis of the accumulated information, a problem is solved and a " +
-            "reserve is created for the future to continue research."; // Описание проблемы
-    private int date = new Random().nextInt(28); // Число окончания тикета
-    private String mail = name+"@gmail.com"; // Почта
+    // Кнопка для перехода в окно создания тикета
+    private WebElement openTicket = driver.findElement(By.xpath("//a[@href='/tickets/submit/']"));
 
-    public void ticketCreate(){
+    // Определяем расположение элементов на странице создания тикета
+    // Очередь
+    @FindBy(id="id_queue")
+    private WebElement queueSelect;
+    @FindBy(css="option[value='1']")
+    private WebElement queueSelectChoice;
+
+    // Название тикета
+    @FindBy(id="id_title")
+    private WebElement summaryOfTheProblem;
+
+    // Описание тикета
+    @FindBy(css="textarea[class='form-control form-control']")
+    private WebElement descriptionOfYourIssue;
+
+    // Приоритет
+    @FindBy(id="id_priority")
+    private WebElement idPrioritySelect;
+    @FindBy(css="option[value='3']")
+    private WebElement idPrioritySelectChoice;
+
+    // Календарь
+    @FindBy(id="id_due_date")
+    private WebElement dueOnSelect;
+    @FindBy(css="span[class='ui-icon ui-icon-circle-triangle-e']")
+    private WebElement btnNextMonth;
+    @FindBy(xpath="//table[@class='ui-datepicker-calendar']//td//a")
+    private List<WebElement> selectDate;
+
+    // Поле почты
+    @FindBy(css="input[name='submitter_email']")
+    private WebElement eMail;
+
+    // Кнопка создания тикета
+    @FindBy(css="button[class='btn btn-primary btn-lg btn-block']")
+    private WebElement btnCreateTicket;
+
+    public void ticketCreate(String name, String text, int date, String mail){
 
         // Открываем окно создания тикета
-        driver.findElement(By.xpath("//a[@href='/tickets/submit/']")).click();
+        this.openTicket.click();
 
-        // Выбираем Django Helpdesk для очереди
-        Select queueElement = new Select(driver.findElement(By.xpath("//select[@name='queue']")));
-        queueElement.selectByVisibleText("Django Helpdesk");
+        // Инициализируем элементы страницы
+        PageFactory.initElements(driver, this);
+
+        // Сначала нажимаем на список, потом выбираем нужный элемент
+        this.queueSelect.click();
+        this.queueSelectChoice.click();
 
         // Задаем название тикета
-        WebElement summaryOfTheProblem = driver.findElement(By.id("id_title"));
-        summaryOfTheProblem.sendKeys(name);
+        this.summaryOfTheProblem.sendKeys(name);
 
         // Задаем описание проблемы
-        WebElement descriptionOfYourIssue = driver.findElement(By.xpath("//textarea[@class='form-control form-control']"));
-        descriptionOfYourIssue.sendKeys(text);
+        this.descriptionOfYourIssue.sendKeys(text);
 
         // Ставим приоритет
-        Select idPriority = new Select(driver.findElement(By.id("id_priority")));
-        idPriority.selectByVisibleText("3. Normal");
+        this.idPrioritySelect.click();
+        this.idPrioritySelectChoice.click();
 
-        // Открываем календарь и тыкаем следующий месяц
-        WebElement dueOn = driver.findElement(By.id("id_due_date"));
-        dueOn.click();
-        driver.findElement(By.xpath("//span[@class='ui-icon ui-icon-circle-triangle-e']")).click();
-
-        // Добавляем любое число, к котороу должен быть завершен наш тикет
-        List<WebElement> selectDate = driver.findElements(By.xpath("//table[@class='ui-datepicker-calendar']//td//a"));
-        selectDate.get(date).click();
+        // Выбираем дедлайн для тикета
+        this.dueOnSelect.click();
+        this.btnNextMonth.click();
+        this.selectDate.get(date).click();
 
         // Задаем почту
-        WebElement email = driver.findElement(By.xpath("//input[@name='submitter_email']"));
-        email.sendKeys(mail);
+        this.eMail.sendKeys(mail);
 
         // Нажимаем на кнопку создания тикета
-        driver.findElement(By.xpath("//button[@class='btn btn-primary btn-lg btn-block']")).click();
+        this.btnCreateTicket.click();
     }
-
-    // Добавляем геттеры по которым будем искать наш тикет
-    public String getName(){return name;}
-    public String getMail(){return mail;}
-    public String getText(){return text;}
-
 }

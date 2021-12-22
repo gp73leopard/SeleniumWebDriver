@@ -10,57 +10,59 @@ import pages.MainPage;
 import pages.TicketsPage;
 import org.testng.Assert;
 import java.io.IOException;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class HelpdeskUITest extends Assert{
-    private String text;
-    private String mail;
-    private String title;
+
+    // Входные данные
     private WebDriver driver;
+    private String title = "Ticket_name_" + UUID.randomUUID().toString(); // UUID гарантирует уникальность строки
+    private String text = "Formulation of the problem is the first stage, basis, basis of scientific work. " +
+            "Without such a foundation, the rest of the activity turns into a meaningless, haphazard " +
+            "set of concepts, calculations and experiments. A systematic approach to analytical work is to " +
+            "create continuity, when, on the basis of the accumulated information, a problem is solved and a " +
+            "reserve is created for the future to continue research."; // Описание проблемы
+    private int date = new Random().nextInt(28); // Число окончания тикета
+    private String mail = title+"@gmail.com"; // Почта
 
     @Before
     public void setup() throws IOException {
         // Читаем конфигурационный файл в System.properties
         System.getProperties().load(ClassLoader.getSystemResourceAsStream("config.properties"));
+        System.getProperties().load(ClassLoader.getSystemResourceAsStream("user.properties"));
         // Создание экземпляра драйвера
         driver = new ChromeDriver();
         // Устанавливаем размер окна браузера, как максимально возможный
         driver.manage().window().maximize();
         // Установим время ожидания для поиска элементов
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
         // Установить созданный драйвер для поиска в веб-страницах
         AbstractPage.setDriver(driver);
     }
 
     @Test
-    public void createTicketTest()  throws Throwable, IOException{
+    public void createTicketTest()  throws Throwable{
 
         // Заходим на сайт
         driver.get(System.getProperty("site.url"));
+
         // Создаем тикет
-        TicketsPage a = new TicketsPage();
-        a.ticketCreate();
-        // Получаем название тикета, почту и описание проблемы
-        text = a.getText();
-        title = a.getName();
-        mail = a.getMail();
+        TicketsPage ticket = new TicketsPage();
+        ticket.ticketCreate(this.title, this.text, this.date, mail);
 
         // Логинимся
-        driver.findElement(By.xpath("//a[@class='nav-link dropdown-toggle']")).click();
-        // todo: чтение данных учетной записи пользователя из user.properties в System.properties
-        System.getProperties().load(ClassLoader.getSystemResourceAsStream("user.properties"));
         LoginPage loginPage = new LoginPage();
         loginPage.login(System.getProperty("user"), System.getProperty("password"));
-        driver.findElement(By.xpath("//input[@class='btn btn-lg btn-primary btn-block']")).click();
 
         // Поиск созданного тикета
-        MainPage searсh = new MainPage();
+        MainPage createdTicket = new MainPage();
         try {
-            searсh.searhTicket(title, mail);
-            WebElement descript = driver.findElement(By.xpath("//td[@id='ticket-description']/p"));
-            assertEquals(descript.getText(), text); // Сравнение по полю Description (описание)
-            System.out.println("Тикет [" + title + "] найден. Мы произвели поиск по его названию" +
-                    ", a также сравнили описание тикетов.");
+            createdTicket.searhTicket(title, mail);
+            createdTicket.compareTicket(text, title);
         }catch (Exception ex){
             throw new Exception("Ошибка поиска. Соответствий не найдено");
         }
