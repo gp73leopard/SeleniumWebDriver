@@ -1,8 +1,10 @@
 package pages;
 
+import io.qameta.allure.Step;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import java.io.IOException;
 import java.util.List;
 
 public class TicketsPage extends AbstractPage {
@@ -47,7 +49,8 @@ public class TicketsPage extends AbstractPage {
     @FindBy(css="button[class='btn btn-primary btn-lg btn-block']")
     private WebElement btnCreateTicket;
 
-    public void ticketCreate(String name, String text, int date, String mail){
+    @Step("Создаем тикет")
+    public void ticketCreate(String name, String text, int date, String mail) throws IOException {
 
         // Открываем окно создания тикета
         this.openTicket.click();
@@ -76,6 +79,9 @@ public class TicketsPage extends AbstractPage {
 
         // Задаем почту
         this.eMail.sendKeys(mail);
+
+        // Скриним окно и отправляем в отчет
+        createAttachment();
 
         // Нажимаем на кнопку создания тикета
         this.btnCreateTicket.click();

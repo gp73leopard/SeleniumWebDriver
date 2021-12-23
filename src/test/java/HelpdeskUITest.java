@@ -1,20 +1,19 @@
+import io.qameta.allure.Description;
+import io.qameta.allure.Owner;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import pages.AbstractPage;
 import pages.LoginPage;
 import pages.MainPage;
 import pages.TicketsPage;
-import org.testng.Assert;
 import java.io.IOException;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class HelpdeskUITest extends Assert{
+public class HelpdeskUITest{
 
     // Входные данные
     private WebDriver driver;
@@ -45,7 +44,9 @@ public class HelpdeskUITest extends Assert{
     }
 
     @Test
-    public void createTicketTest()  throws Throwable{
+    @Description("Создание тикета и проверка его существование в БД")
+    @Owner("Александр")
+    public void createTicketTest() throws Throwable{
 
         // Заходим на сайт
         driver.get(System.getProperty("site.url"));

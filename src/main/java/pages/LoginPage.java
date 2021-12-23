@@ -1,8 +1,11 @@
 package pages;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Step;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import java.io.IOException;
 
 public class LoginPage extends AbstractPage {
 
@@ -23,7 +26,10 @@ public class LoginPage extends AbstractPage {
     @FindBy(css="input[class='btn btn-lg btn-primary btn-block']")
     private WebElement btnLogInConfirm;
 
-    public void login(String user, String password){
+
+    @Step("Логинимся")
+    @Description("Вход на сайт под своим профилем")
+    public void login(String user, String password) throws IOException {
 
         // Инициализируем элементы на странице
         PageFactory.initElements(driver, this);
@@ -37,8 +43,12 @@ public class LoginPage extends AbstractPage {
         // Вводим пароль
         this.password.sendKeys(password);
 
+        // Скриним окно и отправляем в отчет
+        createAttachment();
+
         // Подтверждаем вход
         this.btnLogInConfirm.click();
+
     }
 
 }
