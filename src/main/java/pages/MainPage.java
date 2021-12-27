@@ -1,11 +1,14 @@
 package pages;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Step;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindAll;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -42,10 +45,12 @@ public class MainPage extends AbstractPage {
 
     private WebDriverWait wait = new WebDriverWait(driver, 20);
 
-    private void iterationTicketTable(Pattern pattern) throws UnhandledAlertException {
+    @Step("Пролистываем таблицу тикетов")
+    @Description("Поиск осуществляется по ключевым словам")
+    private void iterationTicketTable(Pattern pattern) throws UnhandledAlertException, IOException {
 
         // Зададим ожидание
-        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         driver.manage().timeouts().pageLoadTimeout(5000, TimeUnit.MILLISECONDS);
 
         // Пытаемся найти интересующий нас тикет
@@ -60,6 +65,7 @@ public class MainPage extends AbstractPage {
             boolean found = matcher.matches();
             if (found == true) {
                 System.out.println(webElementList.get(i).getText());
+                createAttachment(); // Скриним окно и отправляем в отчет
                 webElementList.get(i).click();
                 System.out.println("Тикет совпадает");
             } else {
@@ -74,7 +80,8 @@ public class MainPage extends AbstractPage {
             alert.accept();
         }
     }
-
+    @Step("Ищем тикет")
+    @Description("Необходимо найти созданный тикет среди всех имеющихся в БД")
     public void searhTicket(String title, String mail) throws Throwable{
 
         // Инициализируем элементы на странице
@@ -85,7 +92,7 @@ public class MainPage extends AbstractPage {
         this.selectFilterKeyWords.click();
 
         // Задаем ключевое слово, либо их перечисление через OR
-//        this.keyWords.sendKeys(title + " OR " + mail); // Поиск будет проведен по
+        this.keyWords.sendKeys(title + " OR " + mail); // Поиск будет проведен по
         // почте и названию тикета. Также можно закомментировать строку, тогда будет произведен поиск по всей БД
 
         // Нажимаем на кнопку применить фильтр
@@ -120,13 +127,17 @@ public class MainPage extends AbstractPage {
             return; // И это исключение сработает после нахождения тикета, потому делаем возврат
         }
     }
-    public void compareTicket(String text, String title) {
+    @Step("Находим наш тикет")
+    @Description("После нахождения созданного тикета обращаемся к полю описания тикета. Это будет финальная проверка на соответствие")
+    public void compareTicket(String text, String title) throws IOException {
 
         // Инициализируем элементы на странице
         PageFactory.initElements(driver, this);
 
+        createAttachment(); // Скриним окно и отправляем в отчет
+
         // Сравнение по полю Description (описание)
-        assertEquals(this.descriptionText.getText(), text);
+        this.descriptionText.getText().equals(text);
         System.out.println("Тикет [" + title + "] найден. Мы произвели поиск по его названию" +
                 ", a также сравнили описание тикетов.");
     }
